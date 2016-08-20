@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">HomeCare</string>
+    <string name="action_add">ADD</string>
+    <string name="device_text">Device</string>
+    <string name="time_text">Time</string>
+    <string name="humidity_text">Humidity</string>
+    <string name="temperature_text">Temperature</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+</resources>
