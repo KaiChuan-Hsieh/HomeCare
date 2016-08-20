@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity
 
     private static final String TAG = "HomeCare";
     private static final String PREF_ACCOUNT_NAME = "accountName";
+    private static final String PREF_LAST_TIME = "lastTime";
     private static final String[] SCOPES = {
             GmailScopes.MAIL_GOOGLE_COM,
             GmailScopes.GMAIL_MODIFY,
@@ -71,6 +72,7 @@ public class MainActivity extends AppCompatActivity
     private InfoManager mInfoManager;
     private ListView mMemberList;
     private TextView mOutputText;
+    private Long lastHandled = 0L;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +87,13 @@ public class MainActivity extends AppCompatActivity
 
         mProgress = new ProgressDialog(this);
         mProgress.setMessage("Calling Gmail API ...");
+
+        Long lastTime = getPreferences(Context.MODE_PRIVATE)
+                .getLong(PREF_LAST_TIME, 0L);
+
+        if (lastTime!=0L) {
+            lastHandled = lastTime;
+        }
 
         // Initialize credentials and service object.
         mCredential = GoogleAccountCredential.usingOAuth2(
@@ -349,7 +358,7 @@ public class MainActivity extends AppCompatActivity
                 String snippet = msg.getSnippet();
                 Long recvTime = msg.getInternalDate();
 
-                if (snippet.contains("Device") && mInfoManager.getMaxRecvTime() < recvTime) {
+                if (snippet.contains("Device") && mInfoManager.getMaxRecvTime()<recvTime && lastHandled<recvTime) {
                     String name = snippet.substring(snippet.indexOf("Device") + 8);
                     MemberInfo info = mInfoManager.getMemberInfo(name, recvTime, "Safe");
                     mInfoManager.addMemberInfo(info);
@@ -466,7 +475,40 @@ public class MainActivity extends AppCompatActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
         MemberInfoDialogFragment memberInfoDialog = new MemberInfoDialogFragment();
         memberInfoDialog.setData(mInfoManager, memberInfo);
-        //MemberInfoDialogFragment.setDismissListener(dialogDismissedListener);
+        MemberInfoDialogFragment.setDismissListener(dialogDismissedListener);
         memberInfoDialog.show(fragmentManager, "MemberInfoDialogFragment");
+    }
+
+    public interface DialogDismissedListener {
+        public void handleDialogDismissed(Long time);
+    }
+
+    DialogDismissedListener dialogDismissedListener = new DialogDismissedListener() {
+        @Override
+        public void handleDialogDismissed(Long time) {
+            Log.i(TAG, "dialog dismissed");
+            if (time>lastHandled) {
+                lastHandled = time;
+                SharedPreferences settings =
+                        getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putLong(PREF_LAST_TIME, lastHandled);
+                editor.apply();
+            }
+            updateList();
+        }
+    };
+
+    private void updateList() {
+        ArrayAdapter<MemberInfo> arrayAdapter = new ArrayAdapter<MemberInfo>(MainActivity.this,
+                R.layout.list_item, mInfoManager.getMemberInfos());
+        mMemberList.setAdapter(arrayAdapter);
+        mMemberList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                MemberInfo info = mInfoManager.getMemberInfos().get(i);
+                showDialog(info);
+            }
+        });
     }
 }
