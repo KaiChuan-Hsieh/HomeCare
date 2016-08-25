@@ -361,8 +361,9 @@ public class MainActivity extends AppCompatActivity
                 if (snippet.contains("Device") && mInfoManager.getMaxRecvTime()<recvTime && lastHandled<recvTime) {
                     String name = snippet.substring(snippet.indexOf("Device") + 8);
                     MemberInfo info = mInfoManager.getMemberInfo(name, recvTime, "Safe");
+                    MemberMonitor memberMonitor = info.getMemberMonitor();
+                    memberMonitor.startMonitoring();
                     mInfoManager.addMemberInfo(info);
-                    mInfoManager.saveMemberInfos();
                 }
             }
 

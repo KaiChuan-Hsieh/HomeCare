@@ -145,28 +145,28 @@ public class InfoManager {
         memberInfo.setMemberName(name);
         memberInfo.setStartTime(time);
         memberInfo.setMemberStatus(status);
+        memberInfo.setMemberHumidity("0");
+        memberInfo.setMemberTemperature("0");
+        MemberMonitor memberMonitor = new MemberMonitor(memberInfo, this);
+        memberInfo.setMemberMonitor(memberMonitor);
         return memberInfo;
     }
 
     public ArrayList<MemberInfo> getMemberInfos() {
-        Iterator<MemberInfo> it = memberInfos.iterator();
-        while (it.hasNext()) {
-            MemberInfo m = it.next();
-            Calendar current = Calendar.getInstance();
-            if (current.getTimeInMillis()-m.getStartTime()>30000) {
-                Log.d(TAG, "Diff time over 30000");
-                m.setMemberStatus("Danger");
-            }
-        }
+        Log.d(TAG, "getMemberInfos In");
         saveMemberInfos();
         return memberInfos;
     }
 
     public void addMemberInfo(MemberInfo memberInfo) {
+        Log.d(TAG, "addMemberInfo In");
         memberInfos.add(memberInfo);
     }
 
     public void removeMemberInfo(MemberInfo memberInfo) {
+        Log.d(TAG, "removeMemberInfo In");
+        MemberMonitor memberMonitor = memberInfo.getMemberMonitor();
+        memberMonitor.stopMonitoring();
         memberInfos.remove(memberInfo);
     }
 

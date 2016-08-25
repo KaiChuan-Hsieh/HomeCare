@@ -12,6 +12,33 @@ public class MemberInfo {
     private Long startTime;
     private String memberName;
     private String memberStatus;
+    private String memberHumidity;
+    private String memberTemperature;
+    private MemberMonitor memberMonitor;
+
+    public void setMemberMonitor(MemberMonitor monitor) {
+        memberMonitor = monitor;
+    }
+
+    public MemberMonitor getMemberMonitor() {
+        return memberMonitor;
+    }
+
+    public String getMemberHumidity() {
+        return memberHumidity;
+    }
+
+    public void setMemberHumidity(String memberHumidity) {
+        this.memberHumidity = memberHumidity;
+    }
+
+    public String getMemberTemperature() {
+        return memberTemperature;
+    }
+
+    public void setMemberTemperature(String memberTemperature) {
+        this.memberTemperature = memberTemperature;
+    }
 
     public String getMemberStatus() {
         return memberStatus;

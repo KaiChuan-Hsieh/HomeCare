@@ -5,22 +5,14 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.SystemClock;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONValue;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-
-import onepv1.ClientOnep;
-import onepv1.OneException;
-import onepv1.Result;
 
 /**
  * Created by kai-chuan on 8/20/16.
@@ -69,8 +61,6 @@ public class MemberInfoDialogFragment extends DialogFragment {
             mTime.setText(startTime);
             builder.setNeutralButton(R.string.delete, deleteClickListener);
             builder.setNegativeButton(R.string.cancel, cancelClickListener);
-            Thread thread = new Thread(retrieveThread);
-            thread.start();
             mTimer = new CountDownTimer(10000, 1000) {
                 @Override
                 public void onTick(long l) {
@@ -80,8 +70,8 @@ public class MemberInfoDialogFragment extends DialogFragment {
                 @Override
                 public void onFinish() {
                     if (dialogCreated) {
-                        mHumidity.setText(humidity);
-                        mTemperature.setText(temperature);
+                        mHumidity.setText(mMemberInfo.getMemberHumidity());
+                        mTemperature.setText(mMemberInfo.getMemberTemperature());
                         mTimer.start();
                     }
                 }
@@ -123,39 +113,4 @@ public class MemberInfoDialogFragment extends DialogFragment {
     static public void setDismissListener(MainActivity.DialogDismissedListener dismissListener) {
         mDismissListener = dismissListener;
     }
-
-    private Runnable retrieveThread = new Runnable() {
-        @Override
-        public void run() {
-            Log.d(TAG, "Thread start");
-            String cik = "5ae5d50aba78473a1df7e6a682c4acd9321899c7";
-            ClientOnep conn = new ClientOnep("http://m2.exosite.com/api:v1/rpc/process", 3, cik);
-
-            try {
-                while (dialogCreated) {
-                    Result res = conn.read("Humidity_SHT30");
-                    if (res.getStatus() == Result.OK){
-                        String read = res.getMessage();
-                        JSONArray dataarr = (JSONArray) JSONValue.parse(read);
-                        JSONArray data1 = (JSONArray)dataarr.get(0);
-                        Log.d(TAG, "Humidity SHT30= " + data1.get(1) + " is read.");
-                        humidity = data1.get(1).toString();
-                    }
-
-                    res = conn.read("Temperature_MCP9800");
-                    if (res.getStatus() == Result.OK){
-                        String read = res.getMessage();
-                        JSONArray dataarr = (JSONArray) JSONValue.parse(read);
-                        JSONArray data1 = (JSONArray)dataarr.get(0);
-                        Log.d(TAG, "Temperature MCP9800= " + data1.get(1) + " is read.");
-                        temperature = data1.get(1).toString();
-                    }
-                    Log.d(TAG, "Sleep 10 seconds");
-                    SystemClock.sleep(10000);
-                }
-            } catch (OneException e) {
-                e.printStackTrace();
-            }
-        }
-    };
 }
