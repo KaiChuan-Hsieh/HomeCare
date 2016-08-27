@@ -12,6 +12,8 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.CountDownTimer;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
@@ -73,12 +75,14 @@ public class MainActivity extends AppCompatActivity
     private ListView mMemberList;
     private TextView mOutputText;
     private Long lastHandled = 0L;
+    private CountDownTimer mTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Log.d(TAG, "onCreate In");
         verifyStoragePermissions(this);
 
         mMemberList = (ListView) findViewById(R.id.memberlist);
@@ -99,6 +103,39 @@ public class MainActivity extends AppCompatActivity
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
+
+        mTimer = new CountDownTimer(10000, 1000) {
+            @Override
+            public void onTick(long l) {
+                Log.d(TAG, "List update: " + l);
+            }
+
+            @Override
+            public void onFinish() {
+                updateList();
+                mTimer.start();
+            }
+        };
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume In");
+        mTimer.start();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause In");
+        mTimer.cancel();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy In");
     }
 
     private void verifyStoragePermissions(Activity activity) {
@@ -303,7 +340,7 @@ public class MainActivity extends AppCompatActivity
      * An asynchronous task that handles the Gmail API call.
      * Placing the API calls in their own task ensures the UI stays responsive.
      */
-    private class MakeRequestTask extends AsyncTask<Void, Void, List<MemberInfo>> {
+    private class MakeRequestTask extends AsyncTask<Void, Void, Boolean> {
         private com.google.api.services.gmail.Gmail mService = null;
         private Exception mLastError = null;
 
@@ -322,13 +359,13 @@ public class MainActivity extends AppCompatActivity
          * @param params no parameters needed for this task.
          */
         @Override
-        protected List<MemberInfo> doInBackground(Void... params) {
+        protected Boolean doInBackground(Void... params) {
             try {
                 return getDataFromApi();
             } catch (Exception e) {
                 mLastError = e;
                 cancel(true);
-                return null;
+                return false;
             }
         }
 
@@ -338,7 +375,7 @@ public class MainActivity extends AppCompatActivity
          * @return List of Strings labels.
          * @throws IOException
          */
-        private List<MemberInfo> getDataFromApi() throws IOException {
+        private Boolean getDataFromApi() throws IOException {
             // Get the labels in the user's account.
             String user = "me";
             String query = "in:inbox from:mailrelay@exosite.com after:2016/08/20";
@@ -366,8 +403,7 @@ public class MainActivity extends AppCompatActivity
                     mInfoManager.addMemberInfo(info);
                 }
             }
-
-            return mInfoManager.getMemberInfos();
+            return true;
         }
 
         /**
@@ -429,24 +465,14 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        protected void onPostExecute(List<MemberInfo> output) {
+        protected void onPostExecute(Boolean result) {
             mProgress.hide();
-            if (output == null || output.size() == 0) {
+            if (result==false) {
                 //mOutputText.setText("No results returned.");
                 Toast.makeText(getApplicationContext(), "No member info returned", Toast.LENGTH_SHORT);
             } else {
-                ArrayAdapter<MemberInfo> arrayAdapter = new ArrayAdapter<MemberInfo>(MainActivity.this,
-                        R.layout.list_item, output);
-                mMemberList.setAdapter(arrayAdapter);
-                mMemberList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        MemberInfo info = mInfoManager.getMemberInfos().get(i);
-                        showDialog(info);
-                    }
-                });
-                //output.add(0, "Data retrieved using the Gmail API:");
-                //mOutputText.setText(TextUtils.join("\n", output));
+                Toast.makeText(getApplicationContext(), "List Synchornization", Toast.LENGTH_SHORT);
+                updateList();
             }
         }
 

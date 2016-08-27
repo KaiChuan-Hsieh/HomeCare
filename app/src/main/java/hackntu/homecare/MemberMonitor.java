@@ -68,11 +68,12 @@ public class MemberMonitor {
                     Calendar current = Calendar.getInstance();
                     if (current.getTimeInMillis()-mMemberInfo.getStartTime()>1800000) {
                         Log.d(TAG, "Diff time over 30 min");
-                        if (Float.parseFloat(mMemberInfo.getMemberHumidity())>60) {
+                        if (Float.parseFloat(mMemberInfo.getMemberHumidity())>60.0 &&
+                                Float.parseFloat(mMemberInfo.getMemberTemperature())>45.0) {
                             Log.d(TAG, "Humidity is over 60, is danger");
                             mMemberInfo.setMemberStatus("Danger");
                         } else {
-                            Log.d(TAG, "Humidity is lower than 60, remove member");
+                            Log.d(TAG, "Humidity is lower than 60 and Temperature is lower than 45, remove member");
                             mInfoManager.removeMemberInfo(mMemberInfo);
                             threadStrated = false;
                             break;
