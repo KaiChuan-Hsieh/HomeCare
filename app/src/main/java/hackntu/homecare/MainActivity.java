@@ -12,20 +12,23 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,6 +49,7 @@ import com.google.api.services.gmail.model.ListMessagesResponse;
 import com.google.api.services.gmail.model.Message;
 
 import java.io.IOException;
+import java.lang.reflect.Member;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -88,6 +92,19 @@ public class MainActivity extends AppCompatActivity
         mMemberList = (ListView) findViewById(R.id.memberlist);
         mOutputText = (TextView) findViewById(R.id.status);
         mInfoManager = new InfoManager(getApplicationContext());
+
+        mMemberList.setAdapter(new MemberAdapter(this));
+        mMemberList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            //清單資料
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+                Member member = (Member) parent.getItemAtPosition(position);
+//                String text = "ID = " + member.getId() +
+//                        ", name = " + member.getName();
+
+            }
+        });
 
         mProgress = new ProgressDialog(this);
         mProgress.setMessage("Calling Gmail API ...");
@@ -538,4 +555,64 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
+
+    private class MemberAdapter extends BaseAdapter {
+        private LayoutInflater layoutInflater;
+        private List<Member> memberList;
+
+        public MemberAdapter(Context context) {
+            layoutInflater = LayoutInflater.from(context);
+
+            memberList = new ArrayList<>();
+//            memberList.add(new Member(23, R.drawable.p01, "John",22,12));
+
+        }
+
+        @Override
+        public int getCount() {
+            return memberList.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return memberList.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return memberList.get(position).getId();
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = layoutInflater.inflate(R.layout.listview_item, parent, false);
+            }
+
+            Member member = memberList.get(position);
+            ImageView ivImage = (ImageView) convertView
+                    .findViewById(R.id.ivImage);
+            ivImage.setImageResource(member.getImage());
+
+            TextView tvId = (TextView) convertView
+                    .findViewById(R.id.tvId);
+            tvId.setText(String.valueOf(member.getId()));
+
+            TextView tvName = (TextView) convertView
+                    .findViewById(R.id.tvName);
+            tvName.setText(member.getName());
+
+            TextView Tmp = (TextView) convertView
+                    .findViewById(R.id.Tmp);
+            Tmp.setText(String.valueOf(member.getTmp()));
+
+            TextView Hum = (TextView) convertView
+                    .findViewById(R.id.Hum);
+            Hum.setText(String.valueOf(member.getHum()));
+
+            return convertView;
+        }
+
+    }
+
 }
