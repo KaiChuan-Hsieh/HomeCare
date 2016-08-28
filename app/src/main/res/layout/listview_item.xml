@@ -1,13 +1,10 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="horizontal">
-    <TextView
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    android:layout_height="match_parent">
 
-    </TextView>
+</TextView>
     <!--<ImageView-->
         <!--android:id="@+id/ivImage"-->
         <!--android:layout_width="48dp"-->
@@ -42,5 +39,3 @@
         <!--android:layout_height="wrap_content"-->
         <!--android:layout_gravity="center_vertical"-->
         <!--android:padding="6dp" />-->
-
-</LinearLayout>
