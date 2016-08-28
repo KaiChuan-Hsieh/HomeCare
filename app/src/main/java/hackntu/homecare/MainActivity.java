@@ -28,7 +28,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -545,7 +544,7 @@ public class MainActivity extends AppCompatActivity
 
     private void updateList() {
         ArrayAdapter<MemberInfo> arrayAdapter = new ArrayAdapter<MemberInfo>(MainActivity.this,
-                R.layout.list_item, mInfoManager.getMemberInfos());
+                R.layout.listview_item, mInfoManager.getMemberInfos());
         mMemberList.setAdapter(arrayAdapter);
         mMemberList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -556,6 +555,8 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+
+    //清單中的資料
     private class MemberAdapter extends BaseAdapter {
         private LayoutInflater layoutInflater;
         private List<Member> memberList;
@@ -564,23 +565,25 @@ public class MainActivity extends AppCompatActivity
             layoutInflater = LayoutInflater.from(context);
 
             memberList = new ArrayList<>();
+//            假資料
 //            memberList.add(new Member(23, R.drawable.p01, "John",22,12));
 
         }
 
+
         @Override
         public int getCount() {
-            return memberList.size();
+            return 0;
         }
 
         @Override
-        public Object getItem(int position) {
-            return memberList.get(position);
+        public Object getItem(int i) {
+            return null;
         }
 
         @Override
-        public long getItemId(int position) {
-            return memberList.get(position).getId();
+        public long getItemId(int i) {
+            return 0;
         }
 
         @Override
@@ -589,26 +592,26 @@ public class MainActivity extends AppCompatActivity
                 convertView = layoutInflater.inflate(R.layout.listview_item, parent, false);
             }
 
-            Member member = memberList.get(position);
-            ImageView ivImage = (ImageView) convertView
-                    .findViewById(R.id.ivImage);
-            ivImage.setImageResource(member.getImage());
-
-            TextView tvId = (TextView) convertView
-                    .findViewById(R.id.tvId);
-            tvId.setText(String.valueOf(member.getId()));
-
-            TextView tvName = (TextView) convertView
-                    .findViewById(R.id.tvName);
-            tvName.setText(member.getName());
-
-            TextView Tmp = (TextView) convertView
-                    .findViewById(R.id.Tmp);
-            Tmp.setText(String.valueOf(member.getTmp()));
-
-            TextView Hum = (TextView) convertView
-                    .findViewById(R.id.Hum);
-            Hum.setText(String.valueOf(member.getHum()));
+//            Member member = memberList.get(position);
+//            ImageView ivImage = (ImageView) convertView
+//                    .findViewById(R.id.ivImage);
+//            ivImage.setImageResource(member.getImage());
+//
+//            TextView tvId = (TextView) convertView
+//                    .findViewById(R.id.tvId);
+//            tvId.setText(String.valueOf(member.getId()));
+//
+//            TextView tvName = (TextView) convertView
+//                    .findViewById(R.id.tvName);
+//            tvName.setText(member.getName());
+//
+//            TextView Tmp = (TextView) convertView
+//                    .findViewById(R.id.Tmp);
+//            Tmp.setText(String.valueOf(member.getTmp()));
+//
+//            TextView Hum = (TextView) convertView
+//                    .findViewById(R.id.Hum);
+//            Hum.setText(String.valueOf(member.getHum()));
 
             return convertView;
         }
